@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Binary Tool | 0101</title>
+    <style>
+        body { background: #0d1117; color: #00ff41; font-family: 'Courier New', monospace; display: flex; justify-content: center; padding: 40px; }
+        .container { border: 1px solid #00ff41; padding: 25px; background: #161b22; width: 100%; max-width: 600px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.1); }
+        h2 { text-align: center; border-bottom: 1px solid #00ff41; padding-bottom: 10px; }
+        textarea, select, button { 
+            width: 100%; margin: 10px 0; padding: 12px; 
+            background: #0d1117; color: #00ff41; border: 1px solid #00ff41; 
+            border-radius: 4px; box-sizing: border-box; font-size: 14px;
+        }
+        button { cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #00ff41; color: #0d1117; }
+        .label { font-size: 12px; color: #8b949e; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>> BINARY_PROCESSOR</h2>
+    
+    <div class="label">KODLAMA SİSTEMİ:</div>
+    <select id="enc">
+        <option value="utf-8">UTF-8 (Emoji / Türkçe Destekli)</option>
+        <option value="ascii">ASCII (Sadece İngilizce/Temel)</option>
+    </select>
+
+    <div class="label">GİRDİ (Metin veya 0101-0101...):</div>
+    <textarea id="input" rows="5" placeholder="Mesajı buraya gir..."></textarea>
+    
+    <div style="display: flex; gap: 10px;">
+        <button onclick="handle(true)">ŞİFRELE (ENCODE)</button>
+        <button onclick="handle(false)">ÇÖZ (DECODE)</button>
+    </div>
+
+    <div class="label">SONUÇ:</div>
+    <textarea id="output" rows="5" readonly placeholder="Sonuç burada görünecek..."></textarea>
+</div>
+
+<script>
+function handle(isEncode) {
+    const input = document.getElementById('input').value.trim();
+    const encoding = document.getElementById('enc').value;
+    const output = document.getElementById('output');
+
+    try {
+        if (isEncode) {
+            // Python 3'teki .encode() mantığı
+            const encoder = new TextEncoder();
+            const bytes = encoder.encode(input);
+            output.value = Array.from(bytes).map(b => b.toString(2).padStart(8, '0')).join('-');
+        } else {
+            // Python 3'teki .decode() mantığı
+            const cleanInput = input.replace(/\s/g, ''); // Boşlukları temizle
+            const binaryArr = cleanInput.split('-');
+            const bytes = new Uint8Array(binaryArr.map(b => parseInt(b, 2)));
+            const decoder = new TextDecoder(encoding);
+            output.value = decoder.decode(bytes);
+        }
+    } catch (e) {
+        output.value = "HATA: Geçersiz karakter veya format! (ASCII modunda Türkçe karakter kullanma.)";
+    }
+}
+</script>
+</body>
+</html>
