@@ -2,68 +2,318 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Binary Tool | 0101</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER_TOOL | BIN & B64 v3.0</title>
     <style>
-        body { background: #0d1117; color: #00ff41; font-family: 'Courier New', monospace; display: flex; justify-content: center; padding: 40px; }
-        .container { border: 1px solid #00ff41; padding: 25px; background: #161b22; width: 100%; max-width: 600px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.1); }
-        h2 { text-align: center; border-bottom: 1px solid #00ff41; padding-bottom: 10px; }
-        textarea, select, button { 
-            width: 100%; margin: 10px 0; padding: 12px; 
-            background: #0d1117; color: #00ff41; border: 1px solid #00ff41; 
-            border-radius: 4px; box-sizing: border-box; font-size: 14px;
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap');
+
+        :root {
+            --neon-green: #00ff41;
+            --dark-bg: #050a0f;
+            --glass-bg: rgba(10, 15, 20, 0.75);
+            --border-glow: 0 0 15px rgba(0, 255, 65, 0.3);
         }
-        button { cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #00ff41; color: #0d1117; }
-        .label { font-size: 12px; color: #8b949e; margin-top: 10px; }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            font-family: 'Fira Code', monospace;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+            opacity: 0.6;
+        }
+
+        .container {
+            position: relative; z-index: 1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--neon-green);
+            padding: 30px;
+            width: 90%; max-width: 650px;
+            box-shadow: var(--border-glow), inset 0 0 20px rgba(0, 255, 65, 0.1);
+            border-radius: 8px;
+            animation: bootUp 0.8s ease-out forwards;
+        }
+
+        @keyframes bootUp {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        h2 {
+            text-align: center; margin-top: 0; padding-bottom: 15px;
+            border-bottom: 1px dashed var(--neon-green);
+            font-weight: 700; letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+
+        h2:hover { animation: glitch 0.2s linear infinite; cursor: crosshair; }
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+        .label {
+            font-size: 13px; color: #6e7681; margin-top: 15px; margin-bottom: 5px;
+            text-transform: uppercase; font-weight: 600; letter-spacing: 1px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .privacy-badge {
+            font-size: 10px; color: #00ff41; background: rgba(0,255,65,0.1);
+            padding: 2px 6px; border-radius: 4px; border: 1px solid #00ff41;
+        }
+
+        textarea, select { 
+            width: 100%; padding: 12px; margin-bottom: 5px;
+            background: rgba(0, 0, 0, 0.6); color: var(--neon-green); 
+            border: 1px solid #2ea043; border-radius: 4px; 
+            box-sizing: border-box; font-family: 'Fira Code', monospace;
+            font-size: 14px; transition: 0.3s; resize: vertical;
+        }
+        
+        textarea:focus, select:focus {
+            outline: none; border-color: var(--neon-green);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+        }
+
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: #050a0f; }
+        textarea::-webkit-scrollbar-thumb { background: #2ea043; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
+
+        .btn-group { display: flex; gap: 15px; margin-top: 15px; }
+
+        button { 
+            flex: 1; padding: 12px; cursor: pointer; font-weight: 700; 
+            background: transparent; color: var(--neon-green); 
+            border: 1px solid var(--neon-green); border-radius: 4px;
+            font-family: 'Fira Code', monospace; letter-spacing: 1px;
+            text-transform: uppercase; transition: all 0.2s ease-in-out;
+            position: relative; overflow: hidden;
+        }
+
+        button::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%; background: var(--neon-green);
+            transition: all 0.3s ease-in-out; z-index: -1;
+        }
+
+        button:hover { color: #000; box-shadow: 0 0 15px var(--neon-green); }
+        button:hover::before { left: 0; }
+
+        .copy-btn {
+            background: rgba(0, 255, 65, 0.1); border: none; color: var(--neon-green);
+            padding: 4px 10px; font-size: 12px; cursor: pointer; border-radius: 4px;
+            transition: 0.2s; font-family: 'Fira Code', monospace; width: auto; flex: none;
+        }
+        .copy-btn:hover { background: var(--neon-green); color: #000; }
+        .copy-btn::before { display: none; }
+
+        #toast {
+            position: fixed; bottom: 20px; right: 20px;
+            background: var(--neon-green); color: #000;
+            padding: 10px 20px; border-radius: 4px; font-weight: bold;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 10;
+        }
+        
+        #binary-options { transition: opacity 0.3s, height 0.3s; }
     </style>
 </head>
 <body>
 
+<canvas id="matrixCanvas"></canvas>
+
 <div class="container">
-    <h2>> BINARY_PROCESSOR</h2>
+    <h2>> CYBER_PROCESSOR [BIN/B64]</h2>
     
-    <div class="label">KODLAMA SİSTEMİ:</div>
-    <select id="enc">
-        <option value="utf-8">UTF-8 (Emoji / Türkçe Destekli)</option>
-        <option value="ascii">ASCII (Sadece İngilizce/Temel)</option>
+    <div class="label">İŞLEM MODU:</div>
+    <select id="mode" onchange="toggleMode()">
+        <option value="binary">0101 - Binary Sistemi</option>
+        <option value="base64">B64 - Base64 Şifreleme</option>
     </select>
 
-    <div class="label">GİRDİ (Metin veya 0101-0101...):</div>
-    <textarea id="input" rows="5" placeholder="Mesajı buraya gir..."></textarea>
+    <div class="label">
+        GİRDİ ALANI
+        <span class="privacy-badge">100% LOCAL</span>
+    </div>
+    <textarea id="input" rows="4" placeholder="Şifrelenecek veya çözülecek veriyi gir..."></textarea>
     
-    <div style="display: flex; gap: 10px;">
-        <button onclick="handle(true)">ŞİFRELE (ENCODE)</button>
-        <button onclick="handle(false)">ÇÖZ (DECODE)</button>
+    <div id="binary-options">
+        <div class="label">BİNARY AYIRICI (Sadece Encode İçin):</div>
+        <select id="separator">
+            <option value="-">Tire (-) [Örn: 0100-0001]</option>
+            <option value=" ">Boşluk ( ) [Örn: 0100 0001]</option>
+            <option value="">Bitişik [Örn: 01000001]</option>
+        </select>
     </div>
 
-    <div class="label">SONUÇ:</div>
-    <textarea id="output" rows="5" readonly placeholder="Sonuç burada görünecek..."></textarea>
+    <div class="btn-group">
+        <button onclick="processData(true)">[ ENCODE ]</button>
+        <button onclick="processData(false)">[ DECODE ]</button>
+    </div>
+
+    <div class="label">
+        SİSTEM ÇIKTISI: 
+        <button class="copy-btn" onclick="copyResult()">KOPYALA</button>
+    </div>
+    <textarea id="output" rows="5" readonly placeholder="Sistem çıktısı bekleniyor..."></textarea>
 </div>
 
-<script>
-function handle(isEncode) {
-    const input = document.getElementById('input').value.trim();
-    const encoding = document.getElementById('enc').value;
-    const output = document.getElementById('output');
+<div id="toast">Panoya kopyalandı!</div>
 
-    try {
-        if (isEncode) {
-            // Python 3'teki .encode() mantığı
-            const encoder = new TextEncoder();
-            const bytes = encoder.encode(input);
-            output.value = Array.from(bytes).map(b => b.toString(2).padStart(8, '0')).join('-');
-        } else {
-            // Python 3'teki .decode() mantığı
-            const cleanInput = input.replace(/\s/g, ''); // Boşlukları temizle
-            const binaryArr = cleanInput.split('-');
-            const bytes = new Uint8Array(binaryArr.map(b => parseInt(b, 2)));
-            const decoder = new TextDecoder(encoding);
-            output.value = decoder.decode(bytes);
-        }
-    } catch (e) {
-        output.value = "HATA: Geçersiz karakter veya format! (ASCII modunda Türkçe karakter kullanma.)";
+<script>
+// --- ARAYÜZ YÖNETİMİ ---
+function toggleMode() {
+    const mode = document.getElementById('mode').value;
+    const binOptions = document.getElementById('binary-options');
+    if (mode === 'base64') {
+        binOptions.style.display = 'none';
+    } else {
+        binOptions.style.display = 'block';
     }
 }
+
+// --- CORE LOGIC ---
+async function processData(isEncode) {
+    const input = document.getElementById('input').value.trim();
+    const mode = document.getElementById('mode').value;
+    const separator = document.getElementById('separator').value;
+    const outputElem = document.getElementById('output');
+    
+    if (!input) {
+        animateText(outputElem, "HATA: Girdi alanı boş bırakılamaz.");
+        return;
+    }
+
+    try {
+        let result = "";
+        
+        if (mode === 'binary') {
+            if (isEncode) {
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(input);
+                result = Array.from(bytes).map(b => b.toString(2).padStart(8, '0')).join(separator);
+            } else {
+                let cleanInput = input.trim();
+                let binaryArr = [];
+                if (cleanInput.includes('-')) binaryArr = cleanInput.split('-');
+                else if (cleanInput.includes(' ')) binaryArr = cleanInput.split(' ');
+                else {
+                    cleanInput = cleanInput.replace(/[^01]/g, ''); 
+                    for(let i = 0; i < cleanInput.length; i += 8) {
+                        binaryArr.push(cleanInput.substring(i, i+8));
+                    }
+                }
+                const bytes = new Uint8Array(binaryArr.map(b => parseInt(b, 2)));
+                result = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+            }
+        } 
+        else if (mode === 'base64') {
+            if (isEncode) {
+                // UTF-8 Uyumlu Base64 Encode
+                const bytes = new TextEncoder().encode(input);
+                const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join("");
+                result = btoa(binString);
+            } else {
+                // UTF-8 Uyumlu Base64 Decode
+                const binString = atob(input);
+                const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+                result = new TextDecoder().decode(bytes);
+            }
+        }
+        
+        animateText(outputElem, result);
+    } catch (e) {
+        animateText(outputElem, "HATA: Geçersiz format veya çözülemeyen karakter!");
+    }
+}
+
+// --- TYPEWRITER ANIMATION ---
+function animateText(element, text) {
+    element.value = "";
+    let i = 0;
+    let speed = text.length > 500 ? 1 : 15; 
+    
+    if (text.length > 2000) {
+        element.value = text;
+        return;
+    }
+
+    function typeWriter() {
+        if (i < text.length) {
+            element.value += text.charAt(i);
+            i++;
+            element.scrollTop = element.scrollHeight; 
+            setTimeout(typeWriter, speed);
+        }
+    }
+    typeWriter();
+}
+
+// --- COPY TO CLIPBOARD ---
+function copyResult() {
+    const outputText = document.getElementById('output');
+    outputText.select();
+    outputText.setSelectionRange(0, 99999); 
+    navigator.clipboard.writeText(outputText.value).then(() => {
+        const toast = document.getElementById('toast');
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2000);
+    });
+}
+
+// --- MATRIX RAIN BACKGROUND ---
+const canvas = document.getElementById('matrixCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
+const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const nums = '0123456789';
+const alphabet = katakana + latin + nums;
+
+const fontSize = 14;
+const columns = canvas.width / fontSize;
+const drops = [];
+
+for (let x = 0; x < columns; x++) drops[x] = 1;
+
+function drawMatrix() {
+    ctx.fillStyle = 'rgba(5, 10, 15, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#00ff41'; 
+    ctx.font = fontSize + 'px "Fira Code", monospace';
+
+    for (let i = 0; i < drops.length; i++) {
+        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
+        drops[i]++;
+    }
+}
+setInterval(drawMatrix, 35);
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
 </script>
 </body>
 </html>
