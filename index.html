@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER_TOOL | VAULT & ENCODER v4.0</title>
+    <title>CYBER_TOOL | VAULT & ENCODER v4.2</title>
+    <script src="https://cdn.jsdelivr.net/npm/@zip.js/zip.js/dist/zip.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap');
 
@@ -13,6 +14,7 @@
             --dark-bg: #050a0f;
             --glass-bg: rgba(5, 10, 15, 0.85);
             --border-glow: 0 0 15px rgba(0, 255, 65, 0.4);
+            --cyber-blue: #00e5ff;
         }
 
         body, html {
@@ -44,8 +46,7 @@
             letter-spacing: 3px; text-shadow: 0 0 10px var(--neon-green);
         }
 
-        /* Sekme Tasarımı */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #2ea043; padding-bottom: 10px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #2ea043; padding-bottom: 10px; flex-wrap: wrap; }
         .tab-btn {
             background: transparent; border: none; color: #6e7681; font-size: 14px;
             cursor: pointer; padding: 5px 10px; transition: 0.3s; text-transform: uppercase;
@@ -54,33 +55,23 @@
         .tab-btn:hover { color: var(--neon-green); }
         .tab-content { display: none; animation: fadeIn 0.3s ease-in; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .label {
             font-size: 13px; color: #6e7681; margin-top: 15px; margin-bottom: 5px;
             text-transform: uppercase; font-weight: 600; display: flex; justify-content: space-between;
         }
 
-        .badge {
-            font-size: 10px; padding: 2px 6px; border-radius: 4px; border: 1px solid;
-        }
+        .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; border: 1px solid; }
         .badge.safe { color: var(--neon-green); background: rgba(0,255,65,0.1); border-color: var(--neon-green); }
         .badge.alert { color: var(--alert-red); background: rgba(255,0,60,0.1); border-color: var(--alert-red); }
+        .badge.info { color: var(--cyber-blue); background: rgba(0,229,255,0.1); border-color: var(--cyber-blue); }
 
         textarea, select, input { 
             width: 100%; padding: 12px; margin-bottom: 10px; background: rgba(0, 0, 0, 0.7); 
             color: var(--neon-green); border: 1px solid #2ea043; border-radius: 4px; 
             box-sizing: border-box; font-family: 'Fira Code', monospace; transition: 0.3s;
         }
-        textarea:focus, select:focus, input:focus { outline: none; box-shadow: 0 0 12px rgba(0, 255, 65, 0.3); }
-        input[type="file"] { padding: 8px; cursor: pointer; }
-        input[type="file"]::file-selector-button {
-            background: rgba(0,255,65,0.1); border: 1px solid var(--neon-green);
-            color: var(--neon-green); padding: 5px 10px; border-radius: 3px; cursor: pointer;
-            font-family: 'Fira Code'; transition: 0.3s;
-        }
-        input[type="file"]::file-selector-button:hover { background: var(--neon-green); color: #000; }
-
+        
         .btn-group { display: flex; gap: 15px; margin-top: 10px; }
         button.action-btn { 
             flex: 1; padding: 12px; cursor: pointer; font-weight: 700; 
@@ -90,7 +81,6 @@
         }
         button.action-btn:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 15px var(--neon-green); }
 
-        /* Terminal Log Paneli */
         #terminal {
             background: #000; border: 1px solid #333; height: 120px;
             overflow-y: auto; padding: 10px; font-size: 12px; color: #a5d6a7;
@@ -99,7 +89,7 @@
         .log-time { color: #6e7681; margin-right: 10px; }
         .log-info { color: #00ff41; }
         .log-err { color: #ff003c; }
-        .log-warn { color: #ffcc00; }
+        .log-sys { color: var(--cyber-blue); }
     </style>
 </head>
 <body>
@@ -107,221 +97,164 @@
 <canvas id="matrixCanvas"></canvas>
 
 <div class="container">
-    <h2>> CYBER_VAULT <span style="font-size:12px; color:#6e7681;">v4.0</span></h2>
+    <h2>> CYBER_VAULT <span style="font-size:12px; color:#6e7681;">v4.2</span></h2>
     
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('txt-tool')">[ METİN İŞLEMCİ ]</button>
-        <button class="tab-btn" onclick="switchTab('file-vault')">[ DOSYA KASASI (AES-256) ]</button>
+        <button class="tab-btn" onclick="switchTab('file-vault')">[ DOSYA KİLİDİ ]</button>
+        <button class="tab-btn" onclick="switchTab('zip-vault')">[ ARŞİV KASASI ]</button>
     </div>
 
     <div id="txt-tool" class="tab-content active">
-        <div class="label">İŞLEM MODU: <span class="badge safe">100% LOCAL</span></div>
-        <select id="mode" onchange="toggleMode()">
-            <option value="binary">0101 - Binary Sistemi</option>
-            <option value="base64">B64 - Base64 Şifreleme</option>
+        <div class="label">MOD: <span class="badge safe">LOCAL_ENCODE</span></div>
+        <select id="mode">
+            <option value="binary">Binary (0101)</option>
+            <option value="base64">Base64</option>
         </select>
-        <textarea id="input" rows="3" placeholder="Girdi verisi..."></textarea>
+        <textarea id="input" rows="3" placeholder="Metin girin..."></textarea>
         <div class="btn-group">
-            <button class="action-btn" onclick="processText(true)">[ ENCODE ]</button>
-            <button class="action-btn" onclick="processText(false)">[ DECODE ]</button>
+            <button class="action-btn" onclick="processText(true)">ENCODE</button>
+            <button class="action-btn" onclick="processText(false)">DECODE</button>
         </div>
-        <div class="label">ÇIKTI:</div>
-        <textarea id="output" rows="3" readonly></textarea>
+        <textarea id="output" rows="3" readonly style="margin-top:10px;"></textarea>
     </div>
 
     <div id="file-vault" class="tab-content">
-        <div class="label">KRİPTOGRAFİ MOTORU: <span class="badge alert">AES-256-GCM</span></div>
-        <input type="password" id="aes-key" placeholder="Güçlü bir anahtar şifre girin..." autocomplete="new-password">
+        <div class="label">ALGORİTMA: <span class="badge alert">AES-256-GCM</span></div>
+        <input type="password" id="aes-key" placeholder="Güvenlik Anahtarı...">
         <input type="file" id="file-input">
-        
         <div class="btn-group">
-            <button class="action-btn" onclick="handleFile(true)">[ KİLİTLE (.enc) ]</button>
-            <button class="action-btn" onclick="handleFile(false)">[ ÇÖZ ]</button>
+            <button class="action-btn" onclick="handleFile(true)">KİLİTLE</button>
+            <button class="action-btn" onclick="handleFile(false)">ÇÖZ</button>
         </div>
     </div>
 
-    <div class="label" style="margin-top:25px;">SİSTEM LOGLARI:</div>
+    <div id="zip-vault" class="tab-content">
+        <div class="label">SİSTEM: <span class="badge info">JS_COMPRESSION</span></div>
+        <input type="password" id="zip-key" placeholder="Arşiv Şifresi Belirleyin...">
+        <input type="file" id="zip-file-input">
+        <div class="btn-group">
+            <button class="action-btn" onclick="handleZip(true)">SIKIŞTIR & ŞİFRELE</button>
+            <button class="action-btn" onclick="handleZip(false)">ARŞİVİ AÇ</button>
+        </div>
+    </div>
+
     <div id="terminal"></div>
 </div>
 
 <script>
-// --- UI & TAB YÖNETİMİ ---
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
+// SEKMELER VE LOGLAR
+function switchTab(id) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
     event.target.classList.add('active');
-    logTerm(`Sekme değiştirildi: ${tabId}`, 'info');
 }
 
-// --- TERMİNAL LOG SİSTEMİ ---
 function logTerm(msg, type = 'info') {
-    const term = document.getElementById('terminal');
-    const time = new Date().toLocaleTimeString();
-    let colorClass = 'log-info';
-    if(type === 'err') colorClass = 'log-err';
-    if(type === 'warn') colorClass = 'log-warn';
-    
-    term.innerHTML += `<div><span class="log-time">[${time}]</span> <span class="${colorClass}">${msg}</span></div>`;
-    term.scrollTop = term.scrollHeight;
+    const t = document.getElementById('terminal');
+    const c = type === 'err' ? 'log-err' : (type === 'sys' ? 'log-sys' : 'log-info');
+    t.innerHTML += `<div><span class="log-time">[${new Date().toLocaleTimeString()}]</span> <span class="${c}">${msg}</span></div>`;
+    t.scrollTop = t.scrollHeight;
 }
 
-// --- METİN İŞLEMCİ (BIN/B64) ---
-function processText(isEncode) {
-    const input = document.getElementById('input').value.trim();
+// METİN FONKSİYONLARI
+function processText(enc) {
+    const val = document.getElementById('input').value;
     const mode = document.getElementById('mode').value;
-    const outputElem = document.getElementById('output');
-    
-    if (!input) { logTerm("Metin girdisi boş!", "err"); return; }
-
     try {
-        let result = "";
-        if (mode === 'binary') {
-            if (isEncode) {
-                const bytes = new TextEncoder().encode(input);
-                result = Array.from(bytes).map(b => b.toString(2).padStart(8, '0')).join(' ');
-                logTerm("Metin Binary formatına çevrildi.");
-            } else {
-                let clean = input.replace(/[^01]/g, '');
-                let arr = [];
-                for(let i=0; i<clean.length; i+=8) arr.push(clean.substring(i, i+8));
-                const bytes = new Uint8Array(arr.map(b => parseInt(b, 2)));
-                result = new TextDecoder().decode(bytes);
-                logTerm("Binary metin çözüldü.");
-            }
-        } else if (mode === 'base64') {
-            if (isEncode) {
-                const bytes = new TextEncoder().encode(input);
-                const binStr = Array.from(bytes, b => String.fromCodePoint(b)).join("");
-                result = btoa(binStr);
-                logTerm("Metin Base64 ile kodlandı.");
-            } else {
-                const binStr = atob(input);
-                const bytes = Uint8Array.from(binStr, m => m.codePointAt(0));
-                result = new TextDecoder().decode(bytes);
-                logTerm("Base64 metin çözüldü.");
-            }
+        if(mode === 'binary') {
+            if(enc) document.getElementById('output').value = val.split('').map(c => c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
+            else document.getElementById('output').value = val.split(' ').map(b => String.fromCharCode(parseInt(b, 2))).join('');
+        } else {
+            document.getElementById('output').value = enc ? btoa(val) : atob(val);
         }
-        outputElem.value = result;
-    } catch (e) {
-        logTerm("Metin işleme hatası: " + e.message, "err");
-        outputElem.value = "HATA: Geçersiz format!";
-    }
+        logTerm("Metin işlemi başarılı.");
+    } catch(e) { logTerm("Hata: " + e.message, "err"); }
 }
 
-// --- AES-256 DOSYA KRİPTOGRAFİSİ (WEB CRYPTO API) ---
-// Anahtar Türetme (PBKDF2)
-async function deriveKey(password, salt) {
-    const enc = new TextEncoder();
-    const keyMaterial = await crypto.subtle.importKey(
-        "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
-    );
-    return crypto.subtle.deriveKey(
-        { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
-        keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
-    );
+// AES DOSYA İŞLEME (CRYPTO JS)
+async function deriveKey(pwd, salt) {
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pwd), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations:100000, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["encrypt", "decrypt"]);
 }
 
-// Dosya İşleme Ana Fonksiyonu
-async function handleFile(isEncrypt) {
+async function handleFile(enc) {
     const pwd = document.getElementById('aes-key').value;
-    const fileInput = document.getElementById('file-input');
-    
-    if(!pwd) return logTerm("HATA: Güvenlik anahtarı (şifre) girmediniz!", "err");
-    if(fileInput.files.length === 0) return logTerm("HATA: İşlenecek dosya seçilmedi!", "err");
+    const file = document.getElementById('file-input').files[0];
+    if(!pwd || !file) return logTerm("Eksik veri!", "err");
 
-    const file = fileInput.files[0];
     const reader = new FileReader();
-    
-    logTerm(`Dosya okunuyor: ${file.name} (${(file.size/1024).toFixed(2)} KB)`, "warn");
-
     reader.onload = async (e) => {
         try {
-            const fileData = e.target.result;
-            if (isEncrypt) {
-                logTerm("Şifreleme başlatıldı. Anahtar türetiliyor (PBKDF2)...");
+            if(enc) {
                 const salt = crypto.getRandomValues(new Uint8Array(16));
                 const iv = crypto.getRandomValues(new Uint8Array(12));
                 const key = await deriveKey(pwd, salt);
-                
-                logTerm("AES-256-GCM ile veriler kilitleniyor...");
-                const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, fileData);
-                
-                // Salt(16) + IV(12) + Ciphertext
-                const vaultData = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
-                vaultData.set(salt, 0);
-                vaultData.set(iv, salt.length);
-                vaultData.set(new Uint8Array(encrypted), salt.length + iv.length);
-                
-                triggerDownload(vaultData, file.name + ".enc");
-                logTerm(`BAŞARILI: Dosya kilitlendi -> ${file.name}.enc`, "info");
+                const result = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, e.target.result);
+                const out = new Uint8Array(16 + 12 + result.byteLength);
+                out.set(salt, 0); out.set(iv, 16); out.set(new Uint8Array(result), 28);
+                download(out, file.name + ".enc");
             } else {
-                logTerm("Kilit açma başlatıldı. Dosya analiz ediliyor...");
-                const dataArray = new Uint8Array(fileData);
-                const salt = dataArray.slice(0, 16);
-                const iv = dataArray.slice(16, 28);
-                const ciphertext = dataArray.slice(28);
-                
-                logTerm("Anahtar doğrulanıyor...");
-                const key = await deriveKey(pwd, salt);
-                
-                logTerm("Veri çözülüyor...");
-                const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ciphertext);
-                
-                let originalName = file.name.replace(".enc", "");
-                if(originalName === file.name) originalName = "decrypted_" + file.name;
-                
-                triggerDownload(new Uint8Array(decrypted), originalName);
-                logTerm(`BAŞARILI: Dosya çözüldü -> ${originalName}`, "info");
+                const data = new Uint8Array(e.target.result);
+                const key = await deriveKey(pwd, data.slice(0, 16));
+                const dec = await crypto.subtle.decrypt({name:"AES-GCM", iv: data.slice(16, 28)}, key, data.slice(28));
+                download(new Uint8Array(dec), "decrypted_" + file.name.replace(".enc", ""));
             }
-        } catch (error) {
-            logTerm("KRİTİK HATA: İşlem başarısız! Yanlış şifre veya bozuk dosya.", "err");
-        }
+            logTerm("Dosya işlemi tamam.");
+        } catch(err) { logTerm("HATA: Şifre yanlış!", "err"); }
     };
     reader.readAsArrayBuffer(file);
 }
 
-function triggerDownload(dataArray, filename) {
-    const blob = new Blob([dataArray], { type: "application/octet-stream" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 0);
+// JAVASCRIPT ZIP İŞLEME
+async function handleZip(isZip) {
+    const pwd = document.getElementById('zip-key').value;
+    const file = document.getElementById('zip-file-input').files[0];
+    if(!pwd || !file) return logTerm("Dosya veya şifre eksik!", "err");
+
+    try {
+        if(isZip) {
+            logTerm("Sıkıştırma başlıyor...", "sys");
+            const bWriter = new zip.BlobWriter("application/zip");
+            const zWriter = new zip.ZipWriter(bWriter, { password: pwd });
+            await zWriter.add(file.name, new zip.BlobReader(file));
+            await zWriter.close();
+            download(await bWriter.getData(), file.name + ".zip");
+        } else {
+            logTerm("Arşiv açılıyor...", "sys");
+            const zReader = new zip.ZipReader(new zip.BlobReader(file), { password: pwd });
+            const entries = await zReader.getEntries();
+            const data = await entries[0].getData(new zip.BlobWriter());
+            download(data, entries[0].filename);
+            await zReader.close();
+        }
+        logTerm("İşlem başarılı.", "info");
+    } catch(e) { logTerm("ZIP Hatası: Şifre yanlış olabilir.", "err"); }
 }
 
-// --- MATRIX ARKA PLAN (Optimize Edilmiş) ---
+function download(data, name) {
+    const blob = new Blob([data]);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    a.click();
+}
+
+// MATRIX BG
 const canvas = document.getElementById('matrixCanvas');
 const ctx = canvas.getContext('2d');
-let width, height, columns, drops;
-const chars = '01アァカサタナハマヤラワガザダバパイキシチニヒミリヰギジヂビピウクスツヌフムユルグズブヅプエケセテネヘメレゲゼデベペオコソトノホモヨロゴゾドボポヴン';
-const fontSize = 14;
-
-function initMatrix() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-    columns = Math.floor(width / fontSize);
-    drops = [];
-    for (let x = 0; x < columns; x++) drops[x] = Math.random() * -100;
+let w = canvas.width = window.innerWidth, h = canvas.height = window.innerHeight;
+const cols = Math.floor(w/14), drops = Array(cols).fill(0);
+function draw() {
+    ctx.fillStyle = 'rgba(5, 10, 15, 0.1)'; ctx.fillRect(0,0,w,h);
+    ctx.fillStyle = '#00ff41'; ctx.font = '14px Courier';
+    drops.forEach((y, i) => {
+        ctx.fillText(String.fromCharCode(0x30A0 + Math.random()*96), i*14, y*14);
+        if(y*14 > h && Math.random() > 0.98) drops[i] = 0; else drops[i]++;
+    });
 }
-initMatrix();
-
-function drawMatrix() {
-    ctx.fillStyle = 'rgba(5, 10, 15, 0.1)';
-    ctx.fillRect(0, 0, width, height);
-    ctx.fillStyle = '#00ff41';
-    ctx.font = fontSize + 'px "Fira Code"';
-    for (let i = 0; i < drops.length; i++) {
-        const text = chars.charAt(Math.floor(Math.random() * chars.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-        if (drops[i] * fontSize > height && Math.random() > 0.95) drops[i] = 0;
-        drops[i]++;
-    }
-}
-setInterval(drawMatrix, 35);
-window.addEventListener('resize', initMatrix);
-
-logTerm("Sistem başlatıldı. AES-256 motoru aktif. Sıfır dış bağlantı (Privacy by Default) doğrulandı.", "info");
+setInterval(draw, 35);
+logTerm("Sistem hazır. Tüm işlemler JavaScript ile tarayıcıda yapılıyor.");
 </script>
 </body>
 </html>
