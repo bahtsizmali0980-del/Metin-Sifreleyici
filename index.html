@@ -3,259 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER_TOOL | VAULT & ENCODER v4.2</title>
-    <script src="https://cdn.jsdelivr.net/npm/@zip.js/zip.js/dist/zip.min.js"></script>
+    <title>CYBER_VAULT v5.0 | AES-256-GCM</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap');
-
-        :root {
-            --neon-green: #00ff41;
-            --alert-red: #ff003c;
-            --dark-bg: #050a0f;
-            --glass-bg: rgba(5, 10, 15, 0.85);
-            --border-glow: 0 0 15px rgba(0, 255, 65, 0.4);
-            --cyber-blue: #00e5ff;
-        }
-
-        body, html {
-            margin: 0; padding: 0; width: 100%; min-height: 100vh;
-            background-color: var(--dark-bg); color: var(--neon-green);
-            font-family: 'Fira Code', monospace; display: flex; 
-            justify-content: center; align-items: flex-start; 
-            overflow-x: hidden; padding-top: 20px; padding-bottom: 20px;
-        }
-
-        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.5; }
-
-        .container {
-            position: relative; z-index: 1; background: var(--glass-bg);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--neon-green); padding: 30px;
-            width: 95%; max-width: 800px; box-shadow: var(--border-glow);
-            border-radius: 8px; animation: bootUp 1s ease-out forwards;
-        }
-
-        @keyframes bootUp {
-            0% { transform: scale(0.9) translateY(50px); opacity: 0; filter: blur(10px); }
-            100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
-        }
-
-        h2 {
-            text-align: center; margin-top: 0; padding-bottom: 15px;
-            border-bottom: 1px dashed var(--neon-green); font-weight: 700; 
-            letter-spacing: 3px; text-shadow: 0 0 10px var(--neon-green);
-        }
-
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #2ea043; padding-bottom: 10px; flex-wrap: wrap; }
-        .tab-btn {
-            background: transparent; border: none; color: #6e7681; font-size: 14px;
-            cursor: pointer; padding: 5px 10px; transition: 0.3s; text-transform: uppercase;
-        }
-        .tab-btn.active { color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); border-bottom: 2px solid var(--neon-green); }
-        .tab-btn:hover { color: var(--neon-green); }
-        .tab-content { display: none; animation: fadeIn 0.3s ease-in; }
-        .tab-content.active { display: block; }
-
-        .label {
-            font-size: 13px; color: #6e7681; margin-top: 15px; margin-bottom: 5px;
-            text-transform: uppercase; font-weight: 600; display: flex; justify-content: space-between;
-        }
-
-        .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; border: 1px solid; }
-        .badge.safe { color: var(--neon-green); background: rgba(0,255,65,0.1); border-color: var(--neon-green); }
-        .badge.alert { color: var(--alert-red); background: rgba(255,0,60,0.1); border-color: var(--alert-red); }
-        .badge.info { color: var(--cyber-blue); background: rgba(0,229,255,0.1); border-color: var(--cyber-blue); }
-
-        textarea, select, input { 
-            width: 100%; padding: 12px; margin-bottom: 10px; background: rgba(0, 0, 0, 0.7); 
-            color: var(--neon-green); border: 1px solid #2ea043; border-radius: 4px; 
-            box-sizing: border-box; font-family: 'Fira Code', monospace; transition: 0.3s;
-        }
-        
-        .btn-group { display: flex; gap: 15px; margin-top: 10px; }
-        button.action-btn { 
-            flex: 1; padding: 12px; cursor: pointer; font-weight: 700; 
-            background: transparent; color: var(--neon-green); 
-            border: 1px solid var(--neon-green); border-radius: 4px;
-            text-transform: uppercase; transition: 0.3s;
-        }
-        button.action-btn:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 15px var(--neon-green); }
-
-        #terminal {
-            background: #000; border: 1px solid #333; height: 120px;
-            overflow-y: auto; padding: 10px; font-size: 12px; color: #a5d6a7;
-            border-radius: 4px; margin-top: 20px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
-        }
-        .log-time { color: #6e7681; margin-right: 10px; }
-        .log-info { color: #00ff41; }
-        .log-err { color: #ff003c; }
-        .log-sys { color: var(--cyber-blue); }
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+        :root { --neon: #00ff41; --bg: #050a0f; --glass: rgba(5, 10, 15, 0.9); }
+        body { background: var(--bg); color: var(--neon); font-family: 'Fira Code', monospace; display: flex; justify-content: center; padding: 20px; }
+        .container { background: var(--glass); border: 1px solid var(--neon); padding: 25px; width: 100%; max-width: 700px; box-shadow: 0 0 20px rgba(0,255,65,0.2); border-radius: 8px; z-index: 2; }
+        h2 { text-align: center; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon); margin-top: 0; }
+        .section { margin-bottom: 20px; border-bottom: 1px dashed #2ea043; padding-bottom: 20px; }
+        label { font-size: 12px; display: block; margin: 10px 0 5px; color: #6e7681; }
+        textarea, input { width: 100%; padding: 12px; background: #000; border: 1px solid #2ea043; color: var(--neon); border-radius: 4px; box-sizing: border-box; margin-bottom: 10px; }
+        .btn-group { display: flex; gap: 10px; }
+        button { flex: 1; padding: 12px; background: transparent; border: 1px solid var(--neon); color: var(--neon); cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: var(--neon); color: #000; box-shadow: 0 0 15px var(--neon); }
+        #terminal { background: #000; height: 100px; overflow-y: auto; padding: 10px; font-size: 11px; border: 1px solid #333; margin-top: 15px; color: #a5d6a7; }
+        canvas { position: fixed; top: 0; left: 0; z-index: 1; opacity: 0.3; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<canvas id="matrixCanvas"></canvas>
+<canvas id="m"></canvas>
 
 <div class="container">
-    <h2>> CYBER_VAULT <span style="font-size:12px; color:#6e7681;">v4.2</span></h2>
+    <h2>> REAL_ENCRYPTOR <small style="font-size: 10px;">v5.0</small></h2>
     
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('txt-tool')">[ METİN İŞLEMCİ ]</button>
-        <button class="tab-btn" onclick="switchTab('file-vault')">[ DOSYA KİLİDİ ]</button>
-        <button class="tab-btn" onclick="switchTab('zip-vault')">[ ARŞİV KASASI ]</button>
-    </div>
-
-    <div id="txt-tool" class="tab-content active">
-        <div class="label">MOD: <span class="badge safe">LOCAL_ENCODE</span></div>
-        <select id="mode">
-            <option value="binary">Binary (0101)</option>
-            <option value="base64">Base64</option>
-        </select>
-        <textarea id="input" rows="3" placeholder="Metin girin..."></textarea>
+    <div class="section">
+        <label>GÜVENLİK ANAHTARI (Şifreyi Çözmek İçin Şarttır!)</label>
+        <input type="password" id="master-key" placeholder="Kırılamaz bir anahtar belirleyin...">
+        
+        <label>METİN GİRİŞİ / ŞİFRELİ VERİ</label>
+        <textarea id="data-input" rows="4" placeholder="Şifrelenecek düz metni veya çözülecek kodu buraya yapıştırın..."></textarea>
+        
         <div class="btn-group">
-            <button class="action-btn" onclick="processText(true)">ENCODE</button>
-            <button class="action-btn" onclick="processText(false)">DECODE</button>
-        </div>
-        <textarea id="output" rows="3" readonly style="margin-top:10px;"></textarea>
-    </div>
-
-    <div id="file-vault" class="tab-content">
-        <div class="label">ALGORİTMA: <span class="badge alert">AES-256-GCM</span></div>
-        <input type="password" id="aes-key" placeholder="Güvenlik Anahtarı...">
-        <input type="file" id="file-input">
-        <div class="btn-group">
-            <button class="action-btn" onclick="handleFile(true)">KİLİTLE</button>
-            <button class="action-btn" onclick="handleFile(false)">ÇÖZ</button>
+            <button onclick="cipherAction(true)">METNİ KİLİTLE (ENCRYPT)</button>
+            <button onclick="cipherAction(false)">KİLİDİ AÇ (DECRYPT)</button>
         </div>
     </div>
 
-    <div id="zip-vault" class="tab-content">
-        <div class="label">SİSTEM: <span class="badge info">JS_COMPRESSION</span></div>
-        <input type="password" id="zip-key" placeholder="Arşiv Şifresi Belirleyin...">
-        <input type="file" id="zip-file-input">
-        <div class="btn-group">
-            <button class="action-btn" onclick="handleZip(true)">SIKIŞTIR & ŞİFRELE</button>
-            <button class="action-btn" onclick="handleZip(false)">ARŞİVİ AÇ</button>
-        </div>
-    </div>
-
+    <label>SİSTEM GÜNLÜĞÜ</label>
     <div id="terminal"></div>
 </div>
 
 <script>
-// SEKMELER VE LOGLAR
-function switchTab(id) {
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    event.target.classList.add('active');
-}
+// --- KRİPTOGRAFİ MOTORU (AES-256-GCM) ---
 
-function logTerm(msg, type = 'info') {
-    const t = document.getElementById('terminal');
-    const c = type === 'err' ? 'log-err' : (type === 'sys' ? 'log-sys' : 'log-info');
-    t.innerHTML += `<div><span class="log-time">[${new Date().toLocaleTimeString()}]</span> <span class="${c}">${msg}</span></div>`;
-    t.scrollTop = t.scrollHeight;
-}
-
-// METİN FONKSİYONLARI
-function processText(enc) {
-    const val = document.getElementById('input').value;
-    const mode = document.getElementById('mode').value;
-    try {
-        if(mode === 'binary') {
-            if(enc) document.getElementById('output').value = val.split('').map(c => c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
-            else document.getElementById('output').value = val.split(' ').map(b => String.fromCharCode(parseInt(b, 2))).join('');
-        } else {
-            document.getElementById('output').value = enc ? btoa(val) : atob(val);
-        }
-        logTerm("Metin işlemi başarılı.");
-    } catch(e) { logTerm("Hata: " + e.message, "err"); }
-}
-
-// AES DOSYA İŞLEME (CRYPTO JS)
 async function deriveKey(pwd, salt) {
-    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pwd), "PBKDF2", false, ["deriveKey"]);
-    return crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations:100000, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["encrypt", "decrypt"]);
+    const enc = new TextEncoder();
+    const baseKey = await crypto.subtle.importKey("raw", enc.encode(pwd), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+        baseKey,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+    );
 }
 
-async function handleFile(enc) {
-    const pwd = document.getElementById('aes-key').value;
-    const file = document.getElementById('file-input').files[0];
-    if(!pwd || !file) return logTerm("Eksik veri!", "err");
+async function cipherAction(isEncrypt) {
+    const pwd = document.getElementById('master-key').value;
+    const input = document.getElementById('data-input').value;
+    const term = document.getElementById('terminal');
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        try {
-            if(enc) {
-                const salt = crypto.getRandomValues(new Uint8Array(16));
-                const iv = crypto.getRandomValues(new Uint8Array(12));
-                const key = await deriveKey(pwd, salt);
-                const result = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, e.target.result);
-                const out = new Uint8Array(16 + 12 + result.byteLength);
-                out.set(salt, 0); out.set(iv, 16); out.set(new Uint8Array(result), 28);
-                download(out, file.name + ".enc");
-            } else {
-                const data = new Uint8Array(e.target.result);
-                const key = await deriveKey(pwd, data.slice(0, 16));
-                const dec = await crypto.subtle.decrypt({name:"AES-GCM", iv: data.slice(16, 28)}, key, data.slice(28));
-                download(new Uint8Array(dec), "decrypted_" + file.name.replace(".enc", ""));
-            }
-            logTerm("Dosya işlemi tamam.");
-        } catch(err) { logTerm("HATA: Şifre yanlış!", "err"); }
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-// JAVASCRIPT ZIP İŞLEME
-async function handleZip(isZip) {
-    const pwd = document.getElementById('zip-key').value;
-    const file = document.getElementById('zip-file-input').files[0];
-    if(!pwd || !file) return logTerm("Dosya veya şifre eksik!", "err");
+    if (!pwd || !input) {
+        term.innerHTML += `<div style="color:red">>> HATA: Anahtar veya veri eksik!</div>`;
+        return;
+    }
 
     try {
-        if(isZip) {
-            logTerm("Sıkıştırma başlıyor...", "sys");
-            const bWriter = new zip.BlobWriter("application/zip");
-            const zWriter = new zip.ZipWriter(bWriter, { password: pwd });
-            await zWriter.add(file.name, new zip.BlobReader(file));
-            await zWriter.close();
-            download(await bWriter.getData(), file.name + ".zip");
+        if (isEncrypt) {
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const key = await deriveKey(pwd, salt);
+            
+            const encodedData = new TextEncoder().encode(input);
+            const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encodedData);
+            
+            // Paket oluştur: Salt(16) + IV(12) + Data
+            const packet = new Uint8Array(16 + 12 + encrypted.byteLength);
+            packet.set(salt, 0);
+            packet.set(iv, 16);
+            packet.set(new Uint8Array(encrypted), 28);
+            
+            // Base64 olarak çıktı ver
+            document.getElementById('data-input').value = btoa(String.fromCharCode(...packet));
+            term.innerHTML += `<div>[${new Date().toLocaleTimeString()}] Metin AES-256 ile zırhlandı.</div>`;
         } else {
-            logTerm("Arşiv açılıyor...", "sys");
-            const zReader = new zip.ZipReader(new zip.BlobReader(file), { password: pwd });
-            const entries = await zReader.getEntries();
-            const data = await entries[0].getData(new zip.BlobWriter());
-            download(data, entries[0].filename);
-            await zReader.close();
+            const packet = new Uint8Array(atob(input).split("").map(c => c.charCodeAt(0)));
+            const salt = packet.slice(0, 16);
+            const iv = packet.slice(16, 28);
+            const data = packet.slice(28);
+            
+            const key = await deriveKey(pwd, salt);
+            const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+            
+            document.getElementById('data-input').value = new TextDecoder().decode(decrypted);
+            term.innerHTML += `<div style="color:cyan">[${new Date().toLocaleTimeString()}] Erişim sağlandı. Veri çözüldü.</div>`;
         }
-        logTerm("İşlem başarılı.", "info");
-    } catch(e) { logTerm("ZIP Hatası: Şifre yanlış olabilir.", "err"); }
+    } catch (e) {
+        term.innerHTML += `<div style="color:red">>> ERİŞİM REDDEDİLDİ: Hatalı anahtar veya bozuk veri!</div>`;
+    }
+    term.scrollTop = term.scrollHeight;
 }
 
-function download(data, name) {
-    const blob = new Blob([data]);
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob); a.download = name;
-    a.click();
-}
-
-// MATRIX BG
-const canvas = document.getElementById('matrixCanvas');
-const ctx = canvas.getContext('2d');
-let w = canvas.width = window.innerWidth, h = canvas.height = window.innerHeight;
-const cols = Math.floor(w/14), drops = Array(cols).fill(0);
+// Matrix Efekti
+const c = document.getElementById("m"), ctx = c.getContext("2d");
+let w = c.width = window.innerWidth, h = c.height = window.innerHeight;
+const columns = Math.floor(w/20), drops = Array(columns).fill(1);
 function draw() {
-    ctx.fillStyle = 'rgba(5, 10, 15, 0.1)'; ctx.fillRect(0,0,w,h);
-    ctx.fillStyle = '#00ff41'; ctx.font = '14px Courier';
+    ctx.fillStyle = "rgba(5, 10, 15, 0.05)"; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "#0f0"; ctx.font = "15px monospace";
     drops.forEach((y, i) => {
-        ctx.fillText(String.fromCharCode(0x30A0 + Math.random()*96), i*14, y*14);
-        if(y*14 > h && Math.random() > 0.98) drops[i] = 0; else drops[i]++;
+        const txt = String.fromCharCode(Math.random()*128);
+        ctx.fillText(txt, i*20, y*20);
+        if (y*20 > h && Math.random() > 0.975) drops[i] = 0; drops[i]++;
     });
 }
-setInterval(draw, 35);
-logTerm("Sistem hazır. Tüm işlemler JavaScript ile tarayıcıda yapılıyor.");
-logTerm("Not: Metinleriniz şifrelenmez sadece kodlanır ve yapay zeka araçları tarafından tespit edilir.");
+setInterval(draw, 33);
 </script>
+
 </body>
 </html>
